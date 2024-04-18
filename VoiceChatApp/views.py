@@ -108,35 +108,83 @@ class ChatBotView(generics.CreateAPIView):
             print("********************************************")
             session_key = request.session.session_key
 
+
+            # Session Creation
             if not session_key:
                 request.session.save()
                 session_key = request.session.session_key
                 print("not ##################333", session_key)
-
             print("session-key", session_key)
+            
+            
+            # Initialized list which appends the questions asked for a session
             previous_questions = request.session.get('previous_questions', [])
-            print(previous_questions) 
-            # user's question
+            print(previous_questions)
+            # Appending user's question questions list
             prompt = request.data['question']
             previous_questions.append(prompt)
 
-            chat_history = [{'role' : 'system', 'content' : 'You are a crypto assisstant and you only answer questions realted to crypto , nothing else.'}]
-
+            # Custom prompting of system and user
+            chat_history= [
+                {
+            "role": "system",
+            "content": f"""
+            !IMPORTANT Please follow these steps:
+            1. You are Crypto Assistant: It answers all the questions realted to crypto only , nothing else.Strictly,It only answer question other than crypto, if a question for information purpose is asked.
+            """
+            },
+                {
+                    "role": "system",
+                    "content": f"""
+                    !IMPORTANT Please follow these steps one by one:
+                    1. Your purpose is to analyze {previous_questions}. If you find anything only related to "what services you provide" , respond with "BOOK AN APPOINTMENT. Type: "Confirm My Appointment" TO CONFIRM YOUR APPOINTMENT AND SEE FOR AVAILABLE SLOTS".Otherwise be crypto assistant.
+                    2. After first step , analyze {previous_questions}. If you find the exact words "Confirm My Appointment". Respond with Message "Available Slots will be shown. Enter Details in the same format: name: "your_name", start_time:"12:45 PM"".Otherwise be crypto assistant.
+                    3. After second step, You  purpose is to  analyze {previous_questions}. If you find user input in or related format "name: "your_name", start_time:"12:45 PM"" then respond with Message :"Success" and convert Data in json format having all the information. Otherwise be crypto assistant.
+                    4.
+                    """
+                },
+               ]
             for question in previous_questions :
                 chat_history.append({'role' : 'user', 'content' : question})
 
             # setup for the system
             # setup = request.data['setup']
 
+            # if prompt.lower()= "what services you provide"
             # open ai chat response
             response = client.chat.completions.create(
-                        model="gpt-3.5-turbo",
+                        model="gpt-4-turbo",
                         messages=chat_history,
                         max_tokens=100,
                         temperature=0.7,
                         )
-           
+
             content = response.choices[0].message.content
+            print(content)
+            print(request.path,"path here")
+            # Calling create_event API based on content recieved
+            if "Success" in content:
+                # Extracting JSON content from the response
+                json_start_index = content.find('```json\n')
+                if json_start_index != -1:
+                    json_start_index += len('```json\n')
+                    json_end_index = content.find('```', json_start_index)
+                    if json_end_index != -1:
+                        json_content = content[json_start_index:json_end_index]
+                        json_data = json.loads(json_content)
+                        print("json converted")
+                        print(json_data)
+
+                        # Calling create_event API based on content received
+                        print("******")
+                        # setting request data
+
+                        create_event = CreateEvent()
+                        response = create_event.post(request=request)
+                        print(response.data,"response_data")
+
+            
+            
             request.session['previous_questions'] = previous_questions
             return Response({'answer' : content}, status=200)
 
