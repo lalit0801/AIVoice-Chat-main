@@ -102,120 +102,114 @@ class CreateEvent(APIView):
 class ChatBotView(generics.CreateAPIView):
     
     def post(self, request):
-    
-        try : 
-            # open ai client creation
-            api_key= os.getenv( 'OPENAI_API_KEY')
-            client = OpenAI(api_key = api_key)
-            print("********************************************")
+
+    try : 
+        # open ai client creation
+        api_key= os.getenv( 'OPENAI_API_KEY')
+        client = OpenAI(api_key = api_key)
+        print("********************************************")
+        session_key = request.session.session_key
+
+
+        # Session Creation
+        if not session_key:
+            request.session.save()
             session_key = request.session.session_key
+            print("not ##################333", session_key)
+        print("session-key", session_key)
+        
+        
+        # Initialized list which appends the questions asked for a session
+        previous_questions = request.session.get('previous_questions', [])
+        print(previous_questions)
+        # Appending user's question questions list
+        prompt = request.data['question']
+        previous_questions.append(prompt)
 
-
-            # Session Creation
-            if not session_key:
-                request.session.save()
-                session_key = request.session.session_key
-                print("not ##################333", session_key)
-            print("session-key", session_key)
-            
-            
-            # Initialized list which appends the questions asked for a session
-            previous_questions = request.session.get('previous_questions', [])
-            print(previous_questions)
-            # Appending user's question questions list
-            prompt = request.data['question']
-            previous_questions.append(prompt)
-
-            # Custom prompting of system and user
-            chat_history= [
-                {
-            "role": "system",
-            "content": f"""
-            !IMPORTANT Please follow these steps:
-            1. You are Crypto Assistant: It answers all the questions realted to crypto only , nothing else.Strictly,It only answer question other than crypto, if a question for information purpose is asked.
-            """
+        # Custom prompting of system and user
+        chat_history= [
+            {
+        "role": "system",
+        "content": f"""
+        !IMPORTANT Please follow these steps:
+        1. You are Crypto Assistant: It answers all the questions realted to crypto only , nothing else.Strictly,It only answer question other than crypto, if a question for information purpose is asked.
+        """
+        },
+            {
+                "role": "system",
+                "content": f"""
+                !IMPORTANT Please follow these steps one by one:
+                1. Your purpose is to analyze {previous_questions}. If you find anything only related to "what services you provide" , respond with "BOOK AN APPOINTMENT. Type: "Confirm My Appointment" TO CONFIRM YOUR APPOINTMENT AND SEE FOR AVAILABLE SLOTS".Otherwise be crypto assistant.
+                2. After first step , analyze {previous_questions}. If you find the exact words "Confirm My Appointment". Respond with Message "Available Slots will be shown. Enter Details in the same format: title: "your_event_title", length of event:"35"".Otherwise be crypto assistant.
+                3. After second step, You  purpose is to  analyze {previous_questions}. If you find user input in or related format "title: "your_event_title", length of event:"35"" then strictly respond with Message :"Success" along with convert Data in json format having all the information. Otherwise be crypto assistant.
+                4.
+                """
             },
-                {
-                    "role": "system",
-                    "content": f"""
-                    !IMPORTANT Please follow these steps one by one:
-                    1. Your purpose is to analyze {previous_questions}. If you find anything only related to "what services you provide" , respond with "BOOK AN APPOINTMENT. Type: "Confirm My Appointment" TO CONFIRM YOUR APPOINTMENT AND SEE FOR AVAILABLE SLOTS".Otherwise be crypto assistant.
-                    2. After first step , analyze {previous_questions}. If you find the exact words "Confirm My Appointment". Respond with Message "Available Slots will be shown. Enter Details in the same format: title: "your_event_title", length of event:"35"".Otherwise be crypto assistant.
-                    3. After second step, You  purpose is to  analyze {previous_questions}. If you find user input in or related format "title: "your_event_title", length of event:"35"" then strictly respond with Message :"Success" along with convert Data in json format having all the information. Otherwise be crypto assistant.
-                    4.
-                    """
-                },
-               ]
-            for question in previous_questions :
-                chat_history.append({'role' : 'user', 'content' : question})
+            ]
+        for question in previous_questions :
+            chat_history.append({'role' : 'user', 'content' : question})
 
-            
-            # open ai chat response
-            response = client.chat.completions.create(
-                        model="gpt-4-turbo",
-                        messages=chat_history,
-                        max_tokens=100,
-                        temperature=0.7,
-                        )
+        
+        # open ai chat response
+        response = client.chat.completions.create(
+                    model="gpt-4-turbo",
+                    messages=chat_history,
+                    max_tokens=100,
+                    temperature=0.7,
+                    )
 
-            content = response.choices[0].message.content
-            print(type(content))
-            print(content)
-            print(request.path,"path here")
-            
-            # Calling create_event API based on content recieved
-            if "Success" in content:
-                # Extracting JSON content from the response
-                json_start_index = content.find('```json\n')
-                if json_start_index != -1:
-                    json_start_index += len('```json\n')
-                    json_end_index = content.find('```', json_start_index)
-                    if json_end_index != -1:
-                        json_content = content[json_start_index:json_end_index]
-                        json_data = json.loads(json_content)
-                        print("json converted")
-                        print(json_data)
-                        print(type(json_data))
+        content = response.choices[0].message.content
+        print(type(content))
+        print(content)
+        print(request.path,"path here")
+        
+        # Calling create_event API based on content recieved
+        if "Success" in content:
+            # Extracting JSON content from the response
+            json_start_index = content.find('```json\n')
+            if json_start_index != -1:
+                json_start_index += len('```json\n')
+                json_end_index = content.find('```', json_start_index)
+                if json_end_index != -1:
+                    json_content = content[json_start_index:json_end_index]
+                    json_data = json.loads(json_content)
+                    print("json converted")
+                    print(json_data)
+                    print(type(json_data))
 
-                        # Calling create_event API based on content received
-                        print("******")
-                        
-                        # Establish a connection to the server
-                        reqUrl= "https://api.cal.com/v1/event-types?apiKey=cal_live_0aa50476d76c04be2e1d9b16e961081b"
-                        # https://api.cal.com/v1/event-types?apiKey=cal_test_xxxxxx
-                        print("cal.com api hit")
-                        payload = {
-                            "length": int(json_data.get("length of event")),
-                            "title": json_data.get("title"),
-                            "metadata": {},
-                            "slug": json_data.get("title").replace(" ", "-").lower()  # Generating slug from the title
-                        }
-
-                        # Convert the payload dictionary to JSON string
-                        payload_json = json.dumps(payload)
+                    print("******")
+                    # Calling create_event API based on content received
                     
-                        # payload = json.dumps(json_data)
-                        print(payload,"data in payload")
-                        # print(payload,"______")
+                    # Establish a connection to the server
+                    cal_api_key= os.getenv('CAL_API_KEY')
+                    reqUrl = f"https://api.cal.com/v1/event-types?apiKey={cal_api_key}"
 
-                        response= requests.request("POST", reqUrl, data=payload_json,  headers=request.headers)
-                        print("response executed")
-                        if response.status_code == 200:
-                    # Return success response
-                            print("success")
-                        else:
-                            # Return error response
-                            print("failed")
-                
-                        # if response.text == "booked successfully":
-                        #   content= response.text
-                        # else: content= "Failed to schedule event"
+                    headersList = {
+                    "Content-Type": "application/json" 
+                    }
 
-            
-            
-            request.session['previous_questions'] = previous_questions
-            return Response({'answer' : content}, status=200)
+                    payload = json.dumps(
+                    {
+                        "title": json_data.get('title', ''),
+                        "slug": json_data.get('title', '').lower().replace(' ', '-'),
+                        "length": int(json_data.get('length of event', '10')),
+                        "metadata":{}
+                    })
 
-        except Exception as e:
-            print("chat bot error: ", str(e))
-            return Response({"error": "Something went wrong while generating the response."}, status=400)
+                    response = requests.request("POST", reqUrl, data=payload,  headers=headersList)
+
+                    # print(response.text)
+                    if response.status_code == 200:
+                        # Return success response
+                        print("successfully created event")
+                    else:
+                        # Return error response
+                        print("failed to create event")
+
+        request.session['previous_questions'] = previous_questions
+        # return render(request, 'index.html', {'chat_history': chat_history})
+        return Response({'answer' : content}, status=200)
+
+    except Exception as e:
+        print("chat bot error: ", str(e))
+        return Response({"error": "Something went wrong while generating the response."}, status=400)
