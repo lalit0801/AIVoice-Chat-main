@@ -14,7 +14,7 @@ from openai import OpenAI
 import json
 import requests
 
-
+# templates :: https://wetransfer.com/downloads/a2198485c6df0a6ec86221467822e2ef20240422054953/ab3798
 CLIENT_SECRET_FILE = os.path.abspath('new_one.json')
 
 API_NAME = 'calendar'
