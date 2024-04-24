@@ -188,7 +188,7 @@
           </a>
           </div>
           <div class="header_name">
-            <h1>Homefirst DMC</h1>
+            <h1>Chatbot Beta</h1>
             <p class="mb-0"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M10 1C5.03125 1 1 5.03125 1 10C1 14.9688 5.03125 19 10 19C14.9688 19 19 14.9688 19 10C19 5.03125 14.9688 1 10 1Z" stroke="#fff" stroke-width="1.5" stroke-miterlimit="10"/>
               <path d="M10 4V10.75H14.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -214,104 +214,20 @@
           <div id="cm-msg-2" class="chat-msg user" style="">
             <div class="answer">
               <div class="cm-msg-text">Hi, it's great to see you! 👋</div>
-              <div class="cm-msg-text text-downword">What information are you looking for?</div>
+              
             </div>
             
             <!-- <div class="chat-msg  chat-user" style="">
               <p>Wed 3:00 PM</p>
             </div> -->
-          </div>
+          {% comment %} </div> {% endcomment %}
           <!-- homefirst categories start -->
-<div class="home-first-category-main">
-<div class="home-first-category-main-outter">
-<div class="category-box">
-  <div class="category-card">
-  <div class="category-image">
-    <img src="/static/images/nurse.png" class="img-fluid">
-    </div>
-    <div class="category-name">
-<p class="mb-0">Nursing Care</p>
-    </div>
-    </div>
-</div>
-<div class="category-box">
-  <div class="category-card">
-  <div class="category-image">
-    <img src="/static/images/physical.png" class="img-fluid">
-    </div>
-    <div class="category-name">
-<p class="mb-0">Physical Therapy</p>
-    </div>
-    </div>
-</div>
-<div class="category-box">
-  <div class="category-card">
-  <div class="category-image">
-    <img src="/static/images/home-health.png" class="img-fluid">
-    </div>
-    <div class="category-name">
-<p class="mb-0">Home Health <br> Aides</p>
-    </div>
-</div>
-</div>
-<div class="category-box">
-  <div class="category-card">
-  <div class="category-image">
-    <img src="/static/images/nurse.png" class="img-fluid">
-    </div>
-    <div class="category-name">
-<p class="mb-0">Nursing Care</p>
-    </div>
-    </div>
-</div>
-</div>
-</div>
+
           <!-- homefirst categories end -->
-          <div id="cm-msg-1" class="chat-msg self" style="">
-            <div class="cm-msg-text">
-              <h3>Lorem ipsum dolor sit amet</h3>
-            </div>
-            <p>Wed 3:00 PM</p>
-          </div>
-          <div id="cm-msg-2" class="chat-msg user" style="">
-            <div class="answer">
-              <div class="cm-msg-text">Ridvi Pcysto well 2.0 is an ayurvedic
-                formulation designed to treat...</div>
-            </div>
-           
-          </div>
+         
           
           <!-- ticket div start here -->
-          <div class="ticket_sec">
-            <button class="previous-btn">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="14" viewBox="0 0 18 14" fill="none">
-                <path d="M1 7H17" stroke="#6097b4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M7 13L1 7L7 1" stroke="#6097b4" stroke-width="1.5" stroke-linecap="round"
-                  stroke-linejoin="round" />
-              </svg>
-            </button>
-            <button class="next-btn">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="14" viewBox="0 0 18 14" fill="none">
-                <path d="M17 7H1" stroke="#6097b4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M11 13L17 7L11 1" stroke="#6097b4" stroke-width="1.5" stroke-linecap="round"
-                  stroke-linejoin="round" />
-              </svg>
-            </button>
-            <div class="ticket_outer mt-3">
-              <div class="ticket_place_name">
-                <!-- <h5>Washington D.C. to New Delhi</h5> -->
-              </div>
-              <div class="ticket_inner">
-                <div class="category-image">
-                  <img src="https://images.moneycontrol.com/static-mcnews/2022/09/Health-insurance.png" class="img-fluid">
-                  </div>
-                
-                <div class="view_more text-center">
-                  <a href="">View More</a>
-                </div>
-              </div>
-            </div>
-          </div>
+          
           <!-- ticket div end here -->
 
         </div>
@@ -321,9 +237,10 @@
       </div>
       <div class="chat-input">
         <form id= "message-form">
+            {% csrf_token %}
             <div id="chat-box"></div>
             <input type="text" id="chat-input" placeholder="Type your message here" />
-            <button type="submit"  class="chat-submit" id="chat-submit">
+            <button type="submit"  class="chat-submit" id="chat-submit" onclick="fetchData()">
                 <!-- <img src="/static/images/logo\_Sharif.png" class="send\_btn"> -->
                 <div class="send_btn" id="send_btn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="21" viewBox="0 0 22 21" fill="none">
@@ -333,73 +250,85 @@
             </button>
         </form>
       </div>
+
     </div>
   </div>
   <!-- partial -->
+ 
   <script src="/static/js/jquery.min.js"></script>
   <script src="/static/js/bootstrap.min.js"></script>
   <script src="/static/js/script.js"></script>
   
-  {% comment %} <script>
-
-
-    document.getElementById('message-form').addEventListener('submit', function(event) {
-        event.preventDefault();
-        const userInput = document.getElementById('chat-input').value.trim();
-        if (userInput) {
-            const chatBox = document.getElementById('chat-box');
-            chatBox.innerHTML += '<div class="user-message">' + userInput + '</div>';
-            fetch('http://127.0.0.1:8080/chatbot/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: 'message=' + encodeURIComponent(userInput)
-            })
-            .then(response => response.json())
-            .then(data => {
-                chatBox.innerHTML += '<div class="bot-message">' + data.answer + '</div>';
-                chatBox.scrollTop = chatBox.scrollHeight;
-                document.getElementById('chat-input').value = '';
-            })
-            .catch(error => console.error('Error:', error));
-        }
-    });
-
-
-</script> {% endcomment %}
 
   <script>
+    const chatbox= document.getElementById('chat-box');
+    const inputBox= document.getElementById('chat-input')
+    const chatSubmitBtn= document.getElementById('chat-submit')
+    const sendBtn= document.getElementById('send-btn')
+    
+ 
+   
+ 
+    // Add event listener for Enter key press
+         inputBox.addEventListener('keyup', function(event) {
+             if (event.key === 'Enter') {
+                 fetchData();
+             }
+         });
+
+
+//function to fetch data from API
     function fetchData() {
+        console.log("hiii")
+        const userMessage = inputBox.value.trim();
+        console.log(userMessage);
+        if (userMessage) {
+          displayMessage('user', userMessage);
+          inputBox.value = '';
+
         let headersList = {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            'X-CSRFToken': '{{ csrf_token }}'
+
         }
 
         let bodyContent = JSON.stringify({
             "question": document.getElementById("chat-input").value
         });
 
-        fetch("http://127.0.0.1:8080/chatbot/", {
+        fetch("chatbot/", {
             method: "POST",
             body: bodyContent,
             headers: headersList
         })
         .then(response => response.text())
         .then(data => {
-            console.log(data);
-        })
-        .catch(error => {
-            console.error(error);
-        });
+          console.log(data);
+          const message = data.substring(1, data.length - 1);
+          displayMessage('bot', message); // Display the chatbot's response
+      })
+      .catch(error => {
+          console.error('Error getting chatbot response:', error);
+      });
     }
+  }
+//display response into logs  
+    function displayMessage(sender, message) {
+      const chatMsg = document.querySelector('.chat-msg.user');
+    const messageContainer = document.createElement('div');
+    messageContainer.classList.add('answer');
+    const cmMsgText = document.createElement('div');
+    cmMsgText.classList.add('cm-msg-text');
+    cmMsgText.textContent = message;
+    messageContainer.appendChild(cmMsgText);
+    chatMsg.appendChild(messageContainer);
+    chatMsg.scrollTop = chatMsg.scrollHeight;
+  }
 
-    // Attach event listener to the form
-    document.querySelector('form').addEventListener('chat-submit', function(event) {
-        event.preventDefault(); // Prevent form submission
-        fetchData();
-    });
+
+    
 </script> 
+
  
 
 
