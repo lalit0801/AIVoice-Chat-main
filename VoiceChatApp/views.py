@@ -186,7 +186,7 @@ class ChatBotView(generics.CreateAPIView):
                         reqUrl = f"https://api.cal.com/v1/event-types?apiKey={cal_api_key}"
 
                         headersList = {
-                        "Content-Type": "application/json" 
+                        "Content-Type": "application/json" ,
                         }
 
                         payload = json.dumps(
@@ -200,6 +200,13 @@ class ChatBotView(generics.CreateAPIView):
                         response = requests.request("POST", reqUrl, data=payload,  headers=headersList)
 
                         print(response.text)
+                        response_object = json.loads(response.text)
+                        # Extract the ID from the event_type object
+                        event_type_id = response_object['event_type']['id']
+                        
+                        print(event_type_id)
+                        start_time= "2024-04-25T10:30:00.000Z"
+                        booking(event_type_id, start_time)
                         if response.status_code == 200:
                             # Return success response
                             print("successfully created event")
@@ -216,7 +223,48 @@ class ChatBotView(generics.CreateAPIView):
         except Exception as e:
             print("chat bot error: ", str(e))
             return Response({"error": "Something went wrong while generating the response."}, status=400)
-        
+
+
+# booking function to add event to calender
+def booking(event_id, start_time):
+    # cal_api_key= os.getenv('CAL_API_KEY')
+    reqUrl = "https://api.cal.com/v1/bookings?apiKey=cal_live_8e81f4c669a52ae5494c746e188e4f4a"
+    
+    print('11')
+
+    headersList = {
+     "Content-Type": "application/json" 
+    }
+
+    payload = json.dumps(
+    {
+      
+        "eventTypeId": event_id,
+        "start": start_time,
+        "end": "2024-04-25T10:40:00.000Z",
+        "responses": {
+          "name": "Lalit Kumar Yadav",
+          "email": "lalit@snakescript.com",
+          "location": "Calcom HQ"
+        },
+        "timeZone": "Asia/Calcutta",
+        "language": "en",
+        "metadata":{}
+      
+    })
+    print('22')
+    response = requests.request("POST", reqUrl, data=payload,  headers=headersList)
+    print(response.text)
+    if response.status_code == 200:
+                            # Return success response
+        print("successfully booked")
+    else:
+        # Return error response
+        print("failed to book")
+
+    # print(response.text)
+
+
         
 def chatbot(request):
     return render(request, "chatbot.html")
