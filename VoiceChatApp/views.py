@@ -17,7 +17,7 @@ from datetime import datetime, timedelta
 from django.http import StreamingHttpResponse
 import re
 
-
+# tested
 CLIENT_SECRET_FILE = os.path.abspath('new_one.json')
 
 API_NAME = 'calendar'
