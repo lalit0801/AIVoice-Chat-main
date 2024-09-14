@@ -1,5 +1,5 @@
 # from openai import OpenAI
-# client = OpenAI(api_key="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")
+# client = OpenAI(api_key="API_KEY_HERE")
 
 # #create non stream model
 # response = client
